@@ -52,6 +52,8 @@ st.markdown(f"""
         background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.4);
         color: #06b6d4; font-size: 10px; font-weight: 700; letter-spacing: 2px;
         padding: 4px 12px; border-radius: 20px; text-transform: uppercase;
+        display: flex; align-items: center; justify-content: center;
+        min-width: fit-content; white-space: nowrap;
     }}
 
     /* RADAR BOX = TOMBOL */
@@ -216,6 +218,7 @@ st.markdown(f"""
         font-family:'Space Grotesk',sans-serif; letter-spacing:0.5px;
     }}
 
+    /* MOBILE RESPONSIVE - Samsung S8+ & Similar Devices */
     @media (max-width:768px) {{
         div.block-container {{ padding:0.5rem 0.75rem !important; }}
         .nav-container {{ padding:12px 16px; border-radius:14px; }}
@@ -223,7 +226,7 @@ st.markdown(f"""
         .cam-status-text {{ font-size:13px; }}
         .cam-statusbar {{ padding:8px 12px; }}
         .cam-statusbar-item {{ font-size:10px; }}
-        .stat-card {{ padding:15px; border-radius:16px; }}
+        .stat-card {{ padding:15px; border-radius:16px; margin-bottom:12px; }}
         .metric-val {{ font-size:18px; }}
         .info-box {{ padding:16px 18px; border-radius:16px; }}
         .metric-box {{ padding:10px 6px; }}
@@ -239,6 +242,70 @@ st.markdown(f"""
             box-sizing: border-box !important;
             margin: 0 !important;
             padding: 14px 30px !important;
+        }}
+    }}
+
+    /* Samsung S8+ Specific Optimizations */
+    @media (max-width:414px) and (min-height:736px) {{
+        div.block-container {{ padding:0.4rem 0.6rem !important; }}
+        .nav-container {{ padding:10px 14px; border-radius:12px; margin-bottom:18px; }}
+        .nav-container > div:first-child {{ gap:10px; }}
+        .nav-container > div:first-child > div:first-child {{ padding:5px; font-size:14px !important; }}
+        .nav-container > div:first-child > div:last-child > div:first-child {{ font-size:16px !important; }}
+        .nav-container > div:first-child > div:last-child > div:last-child {{ font-size:8px !important; }}
+        .nav-badge {{ font-size:9px; padding:3px 10px; }}
+
+        .cam-placeholder {{ min-height:160px; border-radius:16px; }}
+        .cam-radar-ring {{ width:60px; height:60px; }}
+        .cam-radar-ring::before {{ width:45px; height:45px; }}
+        .cam-radar-ring::after {{ height:30px; }}
+        .cam-status-text {{ font-size:12px; }}
+        .cam-hint {{ font-size:10px; }}
+        .cam-statusbar {{ padding:6px 10px; border-radius:10px; margin-top:8px; }}
+        .cam-statusbar-item {{ font-size:9px; gap:5px; }}
+        .status-dot {{ width:6px; height:6px; }}
+
+        .stat-card {{ padding:12px; border-radius:14px; margin-bottom:10px; }}
+        .stat-card-header {{ margin-bottom:10px; }}
+        .stat-model-name {{ font-size:12px; }}
+        .stat-badge {{ font-size:8px; padding:2px 6px; }}
+        .metric-row {{ gap:8px; }}
+        .metric-box {{ padding:8px 4px; border-radius:10px; }}
+        .metric-val {{ font-size:16px; }}
+        .metric-label {{ font-size:8px; }}
+
+        .info-box {{ padding:14px 16px; border-radius:14px; }}
+        .info-box-title {{ font-size:11px; gap:5px; }}
+        .info-box-body {{ font-size:11px; }}
+        .info-coord {{ font-size:9px; padding:3px 8px; }}
+
+        div[data-testid="stButton"] > button {{
+            min-height: 60px !important;
+            padding: 12px 25px !important;
+            border-radius: 14px !important;
+        }}
+        div[data-testid="stButton"] > button::before {{
+            font-size: 11px;
+            line-height: 1.4;
+        }}
+        div[data-testid="stButton"] > button::after {{
+            font-size: 8px;
+            padding-left: 12px;
+            margin-left: 12px;
+        }}
+    }}
+
+    /* Ultra Compact Mobile */
+    @media (max-width:375px) {{
+        div.block-container {{ padding:0.3rem 0.5rem !important; }}
+        .nav-container {{ padding:8px 12px; border-radius:10px; margin-bottom:15px; }}
+        .stat-card {{ padding:10px; border-radius:12px; margin-bottom:8px; }}
+        .metric-box {{ padding:6px 3px; }}
+        .metric-val {{ font-size:14px; }}
+        .info-box {{ padding:12px 14px; border-radius:12px; }}
+        div[data-testid="stButton"] > button {{
+            min-height: 55px !important;
+            padding: 10px 20px !important;
         }}
     }}
     </style>
