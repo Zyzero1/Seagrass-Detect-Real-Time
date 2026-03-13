@@ -1,9 +1,2 @@
-libglu1-mesa
+libgl1
 libglib2.0-0
-libglx0
-libgthread-2.0-0
-libsm6
-libxext6
-libfontconfig1
-libxrender1
-libice6
