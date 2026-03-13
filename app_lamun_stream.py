@@ -1,10 +1,3 @@
-import subprocess, sys, os
-
-# Uninstall opencv-python GUI, install headless — HARUS sebelum import cv2/ultralytics
-subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", "opencv-python"], check=False)
-subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "--force-reinstall",
-                "opencv-python-headless"], check=False)
-
 import streamlit as st
 import cv2
 import numpy as np
@@ -318,11 +311,6 @@ RTC_CONFIG = RTCConfiguration({
 col_cam, col_stat = st.columns([1.8, 1])
 
 with col_cam:
-    # Tombol toggle — UI sama persis
-    if st.button("RADAR", key='radar_btn'):
-        st.session_state.is_running = not st.session_state.is_running
-        st.rerun()
-
     # Kamera: webrtc saat aktif, placeholder saat nonaktif
     if is_running:
         ctx = webrtc_streamer(
@@ -354,6 +342,11 @@ with col_cam:
                 <div class="cam-statusbar-item">🎯 6 Spesies Target</div>
             </div>
             """, unsafe_allow_html=True)
+
+    # Tombol toggle — pindah ke bawah
+    if st.button("RADAR", key='radar_btn'):
+        st.session_state.is_running = not st.session_state.is_running
+        st.rerun()
 
 with col_stat:
     yolo_placeholder = st.empty()

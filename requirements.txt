@@ -3,6 +3,5 @@ numpy
 Pillow
 av
 streamlit-webrtc
-opencv-python==4.10.0.84
-lapjax
+opencv-python-headless==4.10.0.84
 ultralytics
