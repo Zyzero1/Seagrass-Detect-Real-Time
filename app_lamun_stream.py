@@ -3,7 +3,8 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 import time
-from PIL import Image
+import av
+from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, RTCConfiguration
 
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="SeagrassLive Pro", page_icon="🌊", layout="wide")
@@ -11,19 +12,16 @@ st.set_page_config(page_title="SeagrassLive Pro", page_icon="🌊", layout="wide
 # --- SESSION STATE ---
 if 'is_running' not in st.session_state:
     st.session_state.is_running = False
-if 'camera' not in st.session_state:
-    st.session_state.camera = None
 
 is_running = st.session_state.is_running
 
-# Teks tombol berubah sesuai state
 dot_icon     = "🟢" if is_running else "🔴"
 btn_title    = "⏹  Radar Aktif — Deteksi Berjalan"  if is_running else "▶  Aktifkan Radar Lamun"
 btn_sub      = "Klik untuk menonaktifkan kamera"      if is_running else "Klik untuk memulai deteksi real-time"
 status_color = "#06b6d4" if is_running else "#ef4444"
 status_text  = "AKTIF"   if is_running else "NONAKTIF"
 
-# --- CSS ---
+# --- CSS (sama persis dengan versi kamu, hanya tambah styling webrtc) ---
 st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;900&family=Inter:wght@300;400;500&display=swap');
@@ -56,16 +54,12 @@ st.markdown(f"""
         padding: 4px 12px; border-radius: 20px; text-transform: uppercase;
     }}
 
-    /* ========== RADAR BOX = TOMBOL ========== */
-    /* Wrapper stButton full width, tidak ada margin aneh */
+    /* RADAR BOX = TOMBOL */
     div[data-testid="stButton"] {{
         margin-top: 10px !important;
         margin-bottom: 0 !important;
         width: 100% !important;
     }}
-
-    /* Tombol itu SENDIRI adalah box — pakai pseudo ::before untuk konten kiri,
-       ::after untuk konten kanan. Font-size 0 menyembunyikan label asli. */
     div[data-testid="stButton"] > button {{
         width: 100% !important;
         min-height: 68px !important;
@@ -76,10 +70,8 @@ st.markdown(f"""
         box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05) !important;
         cursor: pointer !important;
         transition: border-color 0.3s, box-shadow 0.3s, background 0.3s !important;
-        /* Sembunyikan label bawaan Streamlit */
         font-size: 0 !important;
         color: transparent !important;
-        /* Pakai flex agar ::before dan ::after bisa diatur posisinya */
         display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
@@ -100,8 +92,6 @@ st.markdown(f"""
         color: transparent !important;
         border-color: #06b6d4 !important;
     }}
-
-    /* Konten KIRI: judul + subjudul */
     div[data-testid="stButton"] > button::before {{
         content: "{dot_icon}  {btn_title}\\A {btn_sub}";
         white-space: pre;
@@ -114,8 +104,6 @@ st.markdown(f"""
         pointer-events: none;
         flex: 1;
     }}
-
-    /* Konten KANAN: label STATUS + nilai */
     div[data-testid="stButton"] > button::after {{
         content: "STATUS\\A {status_text}";
         white-space: pre;
@@ -129,6 +117,18 @@ st.markdown(f"""
         padding-left: 14px;
         border-left: 1px solid rgba(6,182,212,0.2);
         margin-left: 14px;
+    }}
+
+    /* WEBRTC — sembunyikan tombol START/STOP bawaan, styling video */
+    .stWebRtcStreamer div[class*="style__mediaPlayer"] {{
+        border-radius: 20px !important;
+        overflow: hidden !important;
+        border: 1.5px solid rgba(6,182,212,0.2) !important;
+    }}
+    .stWebRtcStreamer video {{
+        width: 100% !important;
+        border-radius: 20px !important;
+        background: #0a1628 !important;
     }}
 
     /* CAMERA PLACEHOLDER */
@@ -227,8 +227,6 @@ st.markdown(f"""
         .metric-val {{ font-size:18px; }}
         .info-box {{ padding:16px 18px; border-radius:16px; }}
         .metric-box {{ padding:10px 6px; }}
-
-        /* Tombol full width di mobile */
         div[data-testid="stButton"] {{
             width: 100% !important;
             margin: 10px 0 0 0 !important;
@@ -241,10 +239,6 @@ st.markdown(f"""
             box-sizing: border-box !important;
             margin: 0 !important;
             padding: 14px 30px !important;
-        }}
-        /* Force button container to be full width */
-        div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlock"] {{
-            width: 100% !important;
         }}
     }}
     </style>
@@ -268,7 +262,7 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# --- MODEL LOADING ---
+# --- MODEL ---
 @st.cache_resource
 def load_models():
     try:
@@ -278,19 +272,80 @@ def load_models():
 
 yolo_model = load_models()
 
+# --- YOLO VIDEO PROCESSOR untuk webrtc ---
+class YOLOProcessor(VideoProcessorBase):
+    def __init__(self):
+        self.model = load_models()
+        self.conf  = 0
+        self.fps   = 0
+
+    def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
+        img     = frame.to_ndarray(format="bgr24")
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+        t1 = time.time()
+        if self.model:
+            results   = self.model(img_rgb, conf=0.4, verbose=False)
+            elapsed   = max(time.time() - t1, 1e-6)
+            self.fps  = round(1 / elapsed)
+            self.conf = round(
+                results[0].boxes.conf.mean().item() * 100
+                if len(results[0].boxes) > 0 else 0
+            )
+            annotated = results[0].plot()
+            out = cv2.cvtColor(annotated, cv2.COLOR_RGB2BGR)
+        else:
+            out = img
+
+        return av.VideoFrame.from_ndarray(out, format="bgr24")
+
+# STUN server agar bisa diakses dari luar jaringan lokal
+RTC_CONFIG = RTCConfiguration({
+    "iceServers": [
+        {"urls": ["stun:stun.l.google.com:19302"]},
+        {"urls": ["stun:stun1.l.google.com:19302"]},
+    ]
+})
+
 # --- LAYOUT UTAMA ---
 col_cam, col_stat = st.columns([1.8, 1])
 
 with col_cam:
-    FRAME_WINDOW = st.empty()
+    # Kamera: webrtc saat aktif, placeholder saat nonaktif
+    if is_running:
+        ctx = webrtc_streamer(
+            key="seagrass-radar",
+            video_processor_factory=YOLOProcessor,
+            rtc_configuration=RTC_CONFIG,
+            media_stream_constraints={
+                "video": {
+                    "width":  {"ideal": 1280},
+                    "height": {"ideal": 720},
+                    "facingMode": "environment",  # kamera belakang HP
+                },
+                "audio": False,
+            },
+            async_processing=True,
+        )
+    else:
+        st.markdown("""
+            <div class="cam-placeholder">
+                <div class="cam-radar-ring"></div>
+                <div>
+                    <div class="cam-status-text">Radar <span>Tidak Aktif</span></div>
+                    <div class="cam-hint" style="margin-top:6px;">Aktifkan toggle untuk memulai</div>
+                </div>
+            </div>
+            <div class="cam-statusbar">
+                <div class="cam-statusbar-item ready"><div class="status-dot ready"></div>Kamera Siap</div>
+                <div class="cam-statusbar-item"><div class="status-dot"></div>Radar Nonaktif</div>
+                <div class="cam-statusbar-item">🎯 6 Spesies Target</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-    # Tombol = box itu sendiri, konten via CSS ::before / ::after
+    # Tombol toggle — UI sama persis
     if st.button("RADAR", key='radar_btn'):
-        new_state = not st.session_state.is_running
-        if not new_state and st.session_state.camera is not None:
-            st.session_state.camera.release()
-            st.session_state.camera = None
-        st.session_state.is_running = new_state
+        st.session_state.is_running = not st.session_state.is_running
         st.rerun()
 
 with col_stat:
@@ -298,6 +353,7 @@ with col_stat:
     eff_placeholder  = st.empty()
 
     if not is_running:
+        # Standby cards
         yolo_placeholder.markdown("""
             <div class="stat-card" style="border-left:3px solid #3b82f6;">
                 <div class="stat-card-header">
@@ -322,6 +378,41 @@ with col_stat:
                 </div>
             </div>""", unsafe_allow_html=True)
 
+    else:
+        # Live cards — ambil conf & fps dari processor jika sudah tersambung
+        conf_val = 0
+        fps_val  = 0
+        try:
+            if ctx and ctx.video_processor:
+                conf_val = ctx.video_processor.conf
+                fps_val  = ctx.video_processor.fps
+        except:
+            pass
+
+        yolo_placeholder.markdown(f"""
+            <div class="stat-card" style="border-left:3px solid #3b82f6;">
+                <div class="stat-card-header">
+                    <span class="stat-model-name">YOLOv8</span>
+                    <span class="stat-badge" style="background:rgba(59,130,246,0.15);color:#60a5fa;">⚡ Live</span>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-box"><span class="metric-val" style="color:#3b82f6;">{conf_val}%</span><span class="metric-label">Confidence</span></div>
+                    <div class="metric-box"><span class="metric-val" style="color:#e2e8f0;">{fps_val}</span><span class="metric-label">FPS Rate</span></div>
+                </div>
+            </div>""", unsafe_allow_html=True)
+
+        eff_placeholder.markdown("""
+            <div class="stat-card" style="border-left:3px solid #10b981;">
+                <div class="stat-card-header">
+                    <span class="stat-model-name">EfficientDet-D0</span>
+                    <span class="stat-badge" style="background:rgba(16,185,129,0.15);color:#34d399;">⚡ Live</span>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-box"><span class="metric-val" style="color:#10b981;">0%</span><span class="metric-label">Confidence</span></div>
+                    <div class="metric-box"><span class="metric-val" style="color:#e2e8f0;">—</span><span class="metric-label">FPS Rate</span></div>
+                </div>
+            </div>""", unsafe_allow_html=True)
+
     st.markdown("""
         <div class="info-box">
             <div class="info-box-title">📍 Lokasi Penelitian</div>
@@ -332,76 +423,5 @@ with col_stat:
                 indikator kondisi ekosistem padang lamun.
             </div>
             <div class="info-coord">📌 1.1543° N, 104.4017° E</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-# --- DETEKSI LOGIC ---
-if is_running:
-    if st.session_state.camera is None:
-        st.session_state.camera = cv2.VideoCapture(0)
-
-    camera = st.session_state.camera
-
-    while st.session_state.is_running:
-        ret, frame = camera.read()
-        if not ret:
-            break
-
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-        t1 = time.time()
-        results = yolo_model(frame, conf=0.4, verbose=False)
-        fps_yolo = 1 / (time.time() - t1)
-
-        t2 = time.time()
-        time.sleep(0.05)
-        fps_eff = 1 / (time.time() - t2)
-
-        annotated_frame = results[0].plot()
-        FRAME_WINDOW.image(annotated_frame, use_container_width=True)
-
-        conf_yolo = results[0].boxes.conf.mean().item() * 100 if len(results[0].boxes) > 0 else 0
-
-        yolo_placeholder.markdown(f"""
-            <div class="stat-card" style="border-left:3px solid #3b82f6;">
-                <div class="stat-card-header">
-                    <span class="stat-model-name">YOLOv8</span>
-                    <span class="stat-badge" style="background:rgba(59,130,246,0.15);color:#60a5fa;">⚡ Live</span>
-                </div>
-                <div class="metric-row">
-                    <div class="metric-box"><span class="metric-val" style="color:#3b82f6;">{conf_yolo:.0f}%</span><span class="metric-label">Confidence</span></div>
-                    <div class="metric-box"><span class="metric-val" style="color:#e2e8f0;">{fps_yolo:.0f}</span><span class="metric-label">FPS Rate</span></div>
-                </div>
-            </div>""", unsafe_allow_html=True)
-
-        eff_placeholder.markdown(f"""
-            <div class="stat-card" style="border-left:3px solid #10b981;">
-                <div class="stat-card-header">
-                    <span class="stat-model-name">EfficientDet-D0</span>
-                    <span class="stat-badge" style="background:rgba(16,185,129,0.15);color:#34d399;">⚡ Live</span>
-                </div>
-                <div class="metric-row">
-                    <div class="metric-box"><span class="metric-val" style="color:#10b981;">0%</span><span class="metric-label">Confidence</span></div>
-                    <div class="metric-box"><span class="metric-val" style="color:#e2e8f0;">{fps_eff:.0f}</span><span class="metric-label">FPS Rate</span></div>
-                </div>
-            </div>""", unsafe_allow_html=True)
-
-    if st.session_state.camera is not None:
-        st.session_state.camera.release()
-        st.session_state.camera = None
-
-else:
-    FRAME_WINDOW.markdown("""
-        <div class="cam-placeholder">
-            <div class="cam-radar-ring"></div>
-            <div>
-                <div class="cam-status-text">Radar <span>Tidak Aktif</span></div>
-                <div class="cam-hint" style="margin-top:6px;">Aktifkan toggle untuk memulai</div>
-            </div>
-        </div>
-        <div class="cam-statusbar">
-            <div class="cam-statusbar-item ready"><div class="status-dot ready"></div>Kamera Siap</div>
-            <div class="cam-statusbar-item"><div class="status-dot"></div>Radar Nonaktif</div>
-            <div class="cam-statusbar-item">🎯 6 Spesies Target</div>
         </div>
         """, unsafe_allow_html=True)
