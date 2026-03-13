@@ -1,6 +1,6 @@
-libgl1-mesa
+libglu1-mesa
 libglib2.0-0
-libglx-mesa0
+libglx0
 libgthread-2.0-0
 libsm6
 libxext6
