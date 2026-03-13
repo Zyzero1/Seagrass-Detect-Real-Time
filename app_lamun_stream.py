@@ -1,4 +1,10 @@
 import streamlit as st
+
+# Fix: pastikan opencv-python-headless yang dipakai, bukan opencv-python
+import subprocess, sys
+subprocess.run([sys.executable, "-m", "pip", "install", "--quiet",
+                "--force-reinstall", "opencv-python-headless"], check=False)
+
 import cv2
 import numpy as np
 from ultralytics import YOLO
@@ -311,6 +317,11 @@ RTC_CONFIG = RTCConfiguration({
 col_cam, col_stat = st.columns([1.8, 1])
 
 with col_cam:
+    # Tombol toggle — UI sama persis
+    if st.button("RADAR", key='radar_btn'):
+        st.session_state.is_running = not st.session_state.is_running
+        st.rerun()
+
     # Kamera: webrtc saat aktif, placeholder saat nonaktif
     if is_running:
         ctx = webrtc_streamer(
@@ -342,11 +353,6 @@ with col_cam:
                 <div class="cam-statusbar-item">🎯 6 Spesies Target</div>
             </div>
             """, unsafe_allow_html=True)
-
-    # Tombol toggle — UI sama persis
-    if st.button("RADAR", key='radar_btn'):
-        st.session_state.is_running = not st.session_state.is_running
-        st.rerun()
 
 with col_stat:
     yolo_placeholder = st.empty()
