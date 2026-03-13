@@ -1,10 +1,11 @@
+import subprocess, sys, os
+
+# Uninstall opencv-python GUI, install headless — HARUS sebelum import cv2/ultralytics
+subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", "opencv-python"], check=False)
+subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "--force-reinstall",
+                "opencv-python-headless"], check=False)
+
 import streamlit as st
-
-# Fix: pastikan opencv-python-headless yang dipakai, bukan opencv-python
-import subprocess, sys
-subprocess.run([sys.executable, "-m", "pip", "install", "--quiet",
-                "--force-reinstall", "opencv-python-headless"], check=False)
-
 import cv2
 import numpy as np
 from ultralytics import YOLO
