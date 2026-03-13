@@ -218,30 +218,53 @@ st.markdown(f"""
         font-family:'Space Grotesk',sans-serif; letter-spacing:0.5px;
     }}
 
-    /* MOBILE RESPONSIVE - Samsung S8+ & Similar Devices */
+    /* MOBILE RESPONSIVE - iPhone SE & Similar Devices */
     @media (max-width:768px) {{
-        div.block-container {{ padding:0.5rem 0.75rem !important; }}
-        .nav-container {{ padding:12px 16px; border-radius:14px; }}
-        .cam-placeholder {{ min-height:180px; }}
-        .cam-status-text {{ font-size:13px; }}
-        .cam-statusbar {{ padding:8px 12px; }}
-        .cam-statusbar-item {{ font-size:10px; }}
-        .stat-card {{ padding:15px; border-radius:16px; margin-bottom:12px; }}
-        .metric-val {{ font-size:18px; }}
-        .info-box {{ padding:16px 18px; border-radius:16px; }}
-        .metric-box {{ padding:10px 6px; }}
-        div[data-testid="stButton"] {{
-            width: 100% !important;
-            margin: 10px 0 0 0 !important;
-            padding: 0 !important;
-        }}
+        div.block-container {{ padding:0.4rem 0.6rem !important; }}
+        .nav-container {{ padding:10px 14px; border-radius:12px; margin-bottom:15px; }}
+        .nav-container > div:first-child {{ gap:8px; }}
+        .nav-container > div:first-child > div:first-child {{ padding:5px; font-size:14px; }}
+        .nav-container > div:first-child > div:last-child > div:first-child {{ font-size:14px; }}
+        .nav-container > div:first-child > div:last-child > div:last-child {{ font-size:7px; }}
+        .nav-badge {{ font-size:8px; padding:2px 8px; }}
+        
+        .cam-placeholder {{ min-height:150px; border-radius:14px; }}
+        .cam-radar-ring {{ width:50px; height:50px; }}
+        .cam-radar-ring::before {{ width:38px; height:38px; }}
+        .cam-radar-ring::after {{ height:25px; }}
+        .cam-status-text {{ font-size:11px; }}
+        .cam-hint {{ font-size:9px; }}
+        .cam-statusbar {{ padding:6px 10px; border-radius:10px; margin-top:8px; }}
+        .cam-statusbar-item {{ font-size:9px; gap:5px; }}
+        .status-dot {{ width:5px; height:5px; }}
+        
+        .stat-card {{ padding:12px; border-radius:14px; margin-bottom:10px; }}
+        .stat-card-header {{ margin-bottom:10px; }}
+        .stat-model-name {{ font-size:11px; }}
+        .stat-badge {{ font-size:7px; padding:2px 6px; }}
+        .metric-row {{ gap:8px; }}
+        .metric-box {{ padding:8px 4px; border-radius:10px; }}
+        .metric-val {{ font-size:15px; }}
+        .metric-label {{ font-size:7px; }}
+        
+        .info-box {{ padding:14px 16px; border-radius:14px; }}
+        .info-box-title {{ font-size:10px; gap:5px; }}
+        .info-box-body {{ font-size:10px; }}
+        .info-coord {{ font-size:8px; padding:3px 8px; }}
+        
         div[data-testid="stButton"] > button {{
-            width: 100% !important;
-            min-width: 100% !important;
-            max-width: 100% !important;
-            box-sizing: border-box !important;
-            margin: 0 !important;
-            padding: 14px 30px !important;
+            min-height: 55px !important;
+            padding: 14px 40px !important;
+            border-radius: 12px !important;
+        }}
+        div[data-testid="stButton"] > button::before {{
+            font-size: 10px;
+            line-height: 1.3;
+        }}
+        div[data-testid="stButton"] > button::after {{
+            font-size: 7px;
+            padding-left: 10px;
+            margin-left: 10px;
         }}
     }}
 
