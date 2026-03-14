@@ -433,6 +433,8 @@ RTC_CONFIG = RTCConfiguration({
 # --- LAYOUT UTAMA ---
 
 ctx = None
+col_cam, col_stat = st.columns([1.8, 1])
+
 if is_running:
     ctx = webrtc_streamer(
         key="seagrass-radar",
