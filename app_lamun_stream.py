@@ -232,7 +232,7 @@ st.markdown(f"""
         .cam-radar-ring {{ width:50px; height:50px; }}
         .cam-radar-ring::before {{ width:38px; height:38px; }}
         .cam-radar-ring::after {{ height:25px; }}
-        .cam-status-text {{ font-size:11px; }}
+        .cam-status-text {{ font-size:13px; }}
         .cam-hint {{ font-size:9px; }}
         .cam-statusbar {{ padding:6px 10px; border-radius:10px; margin-top:8px; }}
         .cam-statusbar-item {{ font-size:9px; gap:5px; }}
@@ -282,7 +282,7 @@ st.markdown(f"""
         .cam-radar-ring {{ width:60px; height:60px; }}
         .cam-radar-ring::before {{ width:45px; height:45px; }}
         .cam-radar-ring::after {{ height:30px; }}
-        .cam-status-text {{ font-size:12px; }}
+        .cam-status-text {{ font-size:14px; }}
         .cam-hint {{ font-size:10px; }}
         .cam-statusbar {{ padding:6px 10px; border-radius:10px; margin-top:8px; }}
         .cam-statusbar-item {{ font-size:9px; gap:5px; }}
