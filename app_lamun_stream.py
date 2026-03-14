@@ -109,7 +109,7 @@ st.markdown(f"""
     div[data-testid="stButton"] > button::after {{
         content: "STATUS\\A {status_text}";
         white-space: pre;
-        font-size: 11px;
+        font-size: 13px;
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 900;
         color: {status_color};
@@ -211,12 +211,6 @@ st.markdown(f"""
         margin-bottom:10px; display:flex; align-items:center; gap:7px;
     }}
     .info-box-body {{ font-family:'Inter',sans-serif; font-size:12px; color:rgba(255,255,255,0.75); line-height:1.7; }}
-    .info-coord {{
-        display:inline-flex; align-items:center; gap:5px;
-        background:rgba(255,255,255,0.08); border-radius:8px; padding:4px 10px;
-        font-size:10px; font-weight:600; color:#93c5fd; margin-top:10px;
-        font-family:'Space Grotesk',sans-serif; letter-spacing:0.5px;
-    }}
 
     /* MOBILE RESPONSIVE - iPhone SE & Similar Devices */
     @media (max-width:768px) {{
@@ -241,16 +235,15 @@ st.markdown(f"""
         .stat-card {{ padding:12px; border-radius:14px; margin-bottom:10px; }}
         .stat-card-header {{ margin-bottom:10px; }}
         .stat-model-name {{ font-size:14px; }}
-        .stat-badge {{ font-size:10px; padding:2px 6px; }}
+        .stat-badge {{ font-size:8px; padding:2px 6px; }}
         .metric-row {{ gap:8px; }}
         .metric-box {{ padding:8px 4px; border-radius:10px; }}
         .metric-val {{ font-size:16px; }}
-        .metric-label {{ font-size:7px; }}
+        .metric-label {{ font-size:9px; }}
         
         .info-box {{ padding:14px 16px; border-radius:14px; }}
         .info-box-title {{ font-size:14px; gap:5px; }}
         .info-box-body {{ font-size:12px; }}
-        .info-coord {{ font-size:12px; padding:3px 8px; }}
         
         div[data-testid="stButton"] > button {{
             min-height: 55px !important;
@@ -300,7 +293,6 @@ st.markdown(f"""
         .info-box {{ padding:14px 16px; border-radius:14px; }}
         .info-box-title {{ font-size:14px; gap:5px; }}
         .info-box-body {{ font-size:12px; }}
-        .info-coord {{ font-size:12px; padding:3px 8px; }}
 
         div[data-testid="stButton"] > button {{
             min-height: 60px !important;
@@ -512,6 +504,5 @@ with col_stat:
                 <strong style="color:#93c5fd;">6 spesies lamun</strong> utama sebagai
                 indikator kondisi ekosistem padang lamun.
             </div>
-            <div class="info-coord">📌 1.1543° N, 104.4017° E</div>
         </div>
         """, unsafe_allow_html=True)
