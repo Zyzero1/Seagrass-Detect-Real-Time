@@ -97,7 +97,7 @@ st.markdown(f"""
     div[data-testid="stButton"] > button::before {{
         content: "{dot_icon}  {btn_title}\\A {btn_sub}";
         white-space: pre;
-        font-size: 13px;
+        font-size: 14px;
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
         color: #e2e8f0;
@@ -187,7 +187,7 @@ st.markdown(f"""
         margin-bottom:14px; box-shadow:0 8px 30px rgba(0,0,0,0.3);
     }}
     .stat-card-header {{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }}
-    .stat-model-name {{ font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700; color:#e2e8f0; }}
+    .stat-model-name {{ font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; color:#e2e8f0; }}
     .stat-badge {{ font-size:9px; font-weight:700; letter-spacing:1.5px; padding:3px 9px; border-radius:8px; text-transform:uppercase; }}
     .metric-row {{ display:flex; gap:10px; }}
     .metric-box {{
