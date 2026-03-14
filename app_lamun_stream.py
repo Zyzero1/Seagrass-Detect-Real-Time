@@ -17,9 +17,6 @@ if 'is_running' not in st.session_state:
 
 is_running = st.session_state.is_running
 
-if is_running:
-    st_autorefresh(interval=1000, limit=None, key="live_refresh")
-
 dot_icon     = "🟢" if is_running else "🔴"
 btn_title    = "⏹  Radar Aktif — Deteksi Berjalan"  if is_running else "▶  Aktifkan Radar Lamun"
 btn_sub      = "Klik untuk menonaktifkan kamera"      if is_running else "Klik untuk memulai deteksi real-time"
@@ -35,21 +32,14 @@ st.markdown(f"""
 
     /* ← TAMBAH DI SINI */
     div[data-testid="stElementContainer"]:has(iframe[title="streamlit_autorefresh.st_autorefresh"]) {{
-        display: none !important;
-        height: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }}
-    iframe[height="0"] {{
-        display: none !important;
-    }}
-    div:has(> iframe[height="0"]) {{
         height: 0 !important;
         min-height: 0 !important;
-        padding: 0 !important;
         margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
     }}
-    .main, div.block-container, .stApp {{
+
+  div.block-container, .stApp {{
         background-color: #0a1628 !important;
         padding-top: 0px !important;
     }}
@@ -76,11 +66,6 @@ st.markdown(f"""
         margin: 0 !important;
     }}
 
-    .stWebRtcStreamer {{
-        padding: 0 !important;
-        margin: 0 !important;
-    }}
-
     .stWebRtcStreamer > div {{
         padding: 0 !important;
         margin: 0 !important;
@@ -102,41 +87,8 @@ st.markdown(f"""
         overflow: hidden !important;
         border: 1.5px solid rgba(6,182,212,0.2) !important;
     }}
-    .stWebRtcStreamer video {{
-        width: 100% !important;
-        border-radius: 20px !important;
-        background: #0a1628 !important;
-        display: block !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }}
 
     .stWebRtcStreamer {{
-        padding: 0 !important;
-        margin: 0 !important;
-    }}
-    .stWebRtcStreamer > div {{
-        padding: 0 !important;
-        margin: 0 !important;
-        line-height: 0 !important;
-    }}
-
-    /* Hilangkan jarak dari iframe st_autorefresh */
-    div[data-testid="stElementContainer"]:has(iframe[title="streamlit_autorefresh.st_autorefresh"]) {{
-        display: none !important;
-        height: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }}
-
-    /* Hilangkan jarak dari semua iframe height=0 */
-    iframe[height="0"] {{
-        display: none !important;
-    }}
-
-    div:has(> iframe[height="0"]) {{
-        height: 0 !important;
-        min-height: 0 !important;
         padding: 0 !important;
         margin: 0 !important;
     }}
@@ -213,18 +165,6 @@ st.markdown(f"""
         padding-left: 14px;
         border-left: 1px solid rgba(6,182,212,0.2);
         margin-left: 14px;
-    }}
-
-    /* WEBRTC — sembunyikan tombol START/STOP bawaan, styling video */
-    .stWebRtcStreamer div[class*="style__mediaPlayer"] {{
-        border-radius: 20px !important;
-        overflow: hidden !important;
-        border: 1.5px solid rgba(6,182,212,0.2) !important;
-    }}
-    .stWebRtcStreamer video {{
-        width: 100% !important;
-        border-radius: 20px !important;
-        background: #0a1628 !important;
     }}
 
     /* CAMERA PLACEHOLDER */
@@ -635,3 +575,6 @@ with col_stat:
             </div>
         </div>
         """, unsafe_allow_html=True)
+
+if is_running:
+    st_autorefresh(interval=1000, limit=None, key="live_refresh")
