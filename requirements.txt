@@ -3,5 +3,6 @@ numpy
 Pillow
 av
 streamlit-webrtc
+streamlit-autorefresh
 opencv-python-headless
 ultralytics
