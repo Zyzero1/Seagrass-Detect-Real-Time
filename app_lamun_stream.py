@@ -304,7 +304,7 @@ st.markdown(f"""
 
         div[data-testid="stButton"] > button {{
             min-height: 60px !important;
-            padding: 12px 25px !important;
+            padding: 12px 30px !important;
             border-radius: 14px !important;
         }}
         div[data-testid="stButton"] > button::before {{
