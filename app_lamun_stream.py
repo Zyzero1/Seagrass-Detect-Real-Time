@@ -324,7 +324,7 @@ st.markdown(f"""
         .nav-container {{ padding:8px 12px; border-radius:10px; margin-bottom:15px; }}
         .stat-card {{ padding:10px; border-radius:12px; margin-bottom:8px; }}
         .metric-box {{ padding:6px 3px; }}
-        .metric-val {{ font-size:14px; }}
+        .metric-val {{ font-size:16px; }}
         .info-box {{ padding:12px 14px; border-radius:12px; }}
         div[data-testid="stButton"] > button {{
             min-height: 55px !important;
