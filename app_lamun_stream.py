@@ -245,19 +245,7 @@ st.markdown(f"""
         .info-box-title {{ font-size:14px; gap:5px; }}
         .info-box-body {{ font-size:12px; }}
         
-        div[data-testid="stButton"] > button {{
-            min-height: 55px !important;
-            padding: 14px 40px !important;
-            border-radius: 12px !important;
         }}
-        div[data-testid="stButton"] > button::before {{
-            font-size: 10px;
-            line-height: 1.3;
-        }}
-        div[data-testid="stButton"] > button::after {{
-            font-size: 7px;
-            padding-left: 10px;
-            margin-left: 10px;
         }}
     }}
 
