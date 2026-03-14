@@ -328,7 +328,7 @@ st.markdown(f"""
         .info-box {{ padding:12px 14px; border-radius:12px; }}
         div[data-testid="stButton"] > button {{
             min-height: 55px !important;
-            padding: 14px 35px !important;
+            padding: 14px 33px !important;
         }}
     }}
     </style>
