@@ -5,6 +5,8 @@ from ultralytics import YOLO
 import time
 import av
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, RTCConfiguration
+from streamlit_autorefresh import st_autorefresh
+import threading
 
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="SeagrassLive Pro", page_icon="🌊", layout="wide")
@@ -14,6 +16,9 @@ if 'is_running' not in st.session_state:
     st.session_state.is_running = False
 
 is_running = st.session_state.is_running
+
+if is_running:
+    st_autorefresh(interval=1000, limit=None, key="live_refresh")
 
 dot_icon     = "🟢" if is_running else "🔴"
 btn_title    = "⏹  Radar Aktif — Deteksi Berjalan"  if is_running else "▶  Aktifkan Radar Lamun"
@@ -354,32 +359,68 @@ def load_models():
 
 yolo_model = load_models()
 
-# --- YOLO VIDEO PROCESSOR untuk webrtc ---
+# ============================================================
+# YOLO VIDEO PROCESSOR — DIPERBAIKI (tanpa st_autorefresh)
+# - Thread-safe dengan threading.Lock()
+# - Mengukur FPS & inferensi secara akurat (Persamaan 24 & 25)
+# - Tidak menyebabkan kedap-kedip karena tidak pakai autorefresh
+# ============================================================
 class YOLOProcessor(VideoProcessorBase):
     def __init__(self):
-        self.model = load_models()
-        self.conf  = 0
-        self.fps   = 0
+        self.model  = load_models()
+        self._lock  = threading.Lock()
+        self._conf  = 0    # confidence rata-rata deteksi (%)
+        self._fps   = 0    # FPS inferensi (Persamaan 24)
+        self._infer = 0.0  # waktu inferensi ms (Persamaan 25)
+
+    # --- getter thread-safe ---
+    @property
+    def conf(self):
+        with self._lock:
+            return self._conf
+
+    @property
+    def fps(self):
+        with self._lock:
+            return self._fps
+
+    @property
+    def infer_ms(self):
+        with self._lock:
+            return self._infer
 
     def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
-        img     = frame.to_ndarray(format="bgr24")
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        # Konversi frame ke array BGR (format native kamera)
+        img = frame.to_ndarray(format="bgr24")
 
-        t1 = time.time()
         if self.model:
-            results   = self.model(img_rgb, conf=0.4, verbose=False)
-            elapsed   = max(time.time() - t1, 1e-6)
-            self.fps  = round(1 / elapsed)
-            self.conf = round(
-                results[0].boxes.conf.mean().item() * 100
-                if len(results[0].boxes) > 0 else 0
-            )
+            # Catat waktu mulai inferensi — Persamaan 25
+            t_start = time.perf_counter()
+            results = self.model(img, conf=0.4, verbose=False)
+            t_end   = time.perf_counter()
+
+            elapsed_s  = max(t_end - t_start, 1e-6)
+            elapsed_ms = elapsed_s * 1000          # ms → Persamaan 25
+
+            boxes = results[0].boxes
+            new_conf  = round(boxes.conf.mean().item() * 100) if len(boxes) > 0 else 0
+            new_fps   = round(1 / elapsed_s)       # FPS → Persamaan 24
+            new_infer = round(elapsed_ms, 2)
+
+            # Tulis nilai baru secara thread-safe
+            with self._lock:
+                self._conf  = new_conf
+                self._fps   = new_fps
+                self._infer = new_infer
+
             annotated = results[0].plot()
             out = cv2.cvtColor(annotated, cv2.COLOR_RGB2BGR)
         else:
             out = img
 
         return av.VideoFrame.from_ndarray(out, format="bgr24")
+
+# ============================================================
 
 # STUN server agar bisa diakses dari luar jaringan lokal
 RTC_CONFIG = RTCConfiguration({
@@ -393,7 +434,6 @@ RTC_CONFIG = RTCConfiguration({
 col_cam, col_stat = st.columns([1.8, 1])
 
 with col_cam:
-    # Kamera: webrtc saat aktif, placeholder saat nonaktif
     if is_running:
         ctx = webrtc_streamer(
             key="seagrass-radar",
@@ -403,7 +443,7 @@ with col_cam:
                 "video": {
                     "width":  {"ideal": 1280},
                     "height": {"ideal": 720},
-                    "facingMode": "environment",  # kamera belakang HP
+                    "facingMode": "environment",
                 },
                 "audio": False,
             },
@@ -425,7 +465,6 @@ with col_cam:
             </div>
             """, unsafe_allow_html=True)
 
-    # Tombol toggle — pindah ke bawah
     if st.button("RADAR", key='radar_btn'):
         st.session_state.is_running = not st.session_state.is_running
         st.rerun()
@@ -435,7 +474,6 @@ with col_stat:
     eff_placeholder  = st.empty()
 
     if not is_running:
-        # Standby cards
         yolo_placeholder.markdown("""
             <div class="stat-card" style="border-left:3px solid #3b82f6;">
                 <div class="stat-card-header">
@@ -461,7 +499,7 @@ with col_stat:
             </div>""", unsafe_allow_html=True)
 
     else:
-        # Live cards — ambil conf & fps dari processor jika sudah tersambung
+        # Baca langsung dari processor — tanpa autorefresh, tanpa kedap-kedip
         conf_val = 0
         fps_val  = 0
         try:
