@@ -431,14 +431,13 @@ RTC_CONFIG = RTCConfiguration({
 })
 
 # --- LAYOUT UTAMA ---
-col_cam, col_stat = st.columns([1.8, 1])
 
-with col_cam:
-    if is_running:
-        ctx = webrtc_streamer(
-            key="seagrass-radar",
-            video_processor_factory=YOLOProcessor,
-            rtc_configuration=RTC_CONFIG,
+ctx = None
+if is_running:
+    ctx = webrtc_streamer(
+        key="seagrass-radar",
+        video_processor_factory=YOLOProcessor,
+        rtc_configuration=RTC_CONFIG,
             media_stream_constraints={
                 "video": {
                     "width":  {"ideal": 1280},
@@ -449,7 +448,11 @@ with col_cam:
             },
             async_processing=True,
         )
-    else:
+
+col_cam, col_stat = st.columns([1.8, 1])
+
+with col_cam:
+    if not is_running:        
         st.markdown("""
             <div class="cam-placeholder">
                 <div class="cam-radar-ring"></div>
