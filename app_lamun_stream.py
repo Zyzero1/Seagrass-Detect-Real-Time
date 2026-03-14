@@ -254,7 +254,7 @@ st.markdown(f"""
         
         div[data-testid="stButton"] > button {{
             min-height: 55px !important;
-            padding: 14px 20px !important;
+            padding: 14px 40px !important;
             border-radius: 12px !important;
         }}
         div[data-testid="stButton"] > button::before {{
@@ -328,7 +328,7 @@ st.markdown(f"""
         .info-box {{ padding:12px 14px; border-radius:12px; }}
         div[data-testid="stButton"] > button {{
             min-height: 55px !important;
-            padding: 10px 20px !important;
+            padding: 10px 30px !important;
         }}
     }}
     </style>
