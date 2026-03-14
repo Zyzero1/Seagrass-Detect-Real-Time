@@ -50,7 +50,7 @@ st.markdown(f"""
     @keyframes shimmer {{ 0%{{background-position:-200% 0}} 100%{{background-position:200% 0}} }}
     .nav-badge {{
         background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.4);
-        color: #06b6d4; font-size: 10px; font-weight: 700; letter-spacing: 2px;
+        color: #06b6d4; font-size: 10px; font-weight: 300; letter-spacing: 2px;
         padding: 4px 12px; border-radius: 20px; text-transform: uppercase;
         display: flex; align-items: center; justify-content: center;
         min-width: fit-content; white-space: nowrap;
@@ -246,8 +246,6 @@ st.markdown(f"""
         .info-box-body {{ font-size:12px; }}
         
         }}
-        }}
-    }}
 
     /* Samsung S8+ Specific Optimizations */
     @media (max-width:414px) and (min-height:736px) {{
