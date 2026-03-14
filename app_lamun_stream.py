@@ -109,7 +109,7 @@ st.markdown(f"""
     div[data-testid="stButton"] > button::after {{
         content: "STATUS\\A {status_text}";
         white-space: pre;
-        font-size: 9px;
+        font-size: 11px;
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 900;
         color: {status_color};
@@ -235,7 +235,7 @@ st.markdown(f"""
         .cam-status-text {{ font-size:13px; }}
         .cam-hint {{ font-size:9px; }}
         .cam-statusbar {{ padding:6px 10px; border-radius:10px; margin-top:8px; }}
-        .cam-statusbar-item {{ font-size:9px; gap:5px; }}
+        .cam-statusbar-item {{ font-size:12px; gap:5px; }}
         .status-dot {{ width:5px; height:5px; }}
         
         .stat-card {{ padding:12px; border-radius:14px; margin-bottom:10px; }}
@@ -290,17 +290,17 @@ st.markdown(f"""
 
         .stat-card {{ padding:12px; border-radius:14px; margin-bottom:10px; }}
         .stat-card-header {{ margin-bottom:10px; }}
-        .stat-model-name {{ font-size:12px; }}
-        .stat-badge {{ font-size:8px; padding:2px 6px; }}
+        .stat-model-name {{ font-size:14px; }}
+        .stat-badge {{ font-size:10px; padding:2px 6px; }}
         .metric-row {{ gap:8px; }}
         .metric-box {{ padding:8px 4px; border-radius:10px; }}
         .metric-val {{ font-size:16px; }}
         .metric-label {{ font-size:8px; }}
 
         .info-box {{ padding:14px 16px; border-radius:14px; }}
-        .info-box-title {{ font-size:11px; gap:5px; }}
-        .info-box-body {{ font-size:11px; }}
-        .info-coord {{ font-size:9px; padding:3px 8px; }}
+        .info-box-title {{ font-size:14px; gap:5px; }}
+        .info-box-body {{ font-size:12px; }}
+        .info-coord {{ font-size:12px; padding:3px 8px; }}
 
         div[data-testid="stButton"] > button {{
             min-height: 60px !important;
