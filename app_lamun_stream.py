@@ -419,37 +419,33 @@ class YOLOProcessor(VideoProcessorBase):
             return self._infer
 
     def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
-        # Konversi frame ke array BGR (format native kamera)
-        img = frame.to_ndarray(format="bgr24")
+        img_bgr = frame.to_ndarray(format="bgr24")
+        img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)  # ← konversi ke RGB dulu
 
         if self.model:
-            # Catat waktu mulai inferensi — Persamaan 25
             t_start = time.perf_counter()
-            results = self.model(img, conf=0.4, verbose=False)
+            results = self.model(img_rgb, conf=0.4, verbose=False)  # ← masukkan RGB
             t_end   = time.perf_counter()
 
             elapsed_s  = max(t_end - t_start, 1e-6)
-            elapsed_ms = elapsed_s * 1000          # ms → Persamaan 25
+            elapsed_ms = elapsed_s * 1000
 
             boxes = results[0].boxes
             new_conf  = round(boxes.conf.mean().item() * 100) if len(boxes) > 0 else 0
-            new_fps   = round(1 / elapsed_s)       # FPS → Persamaan 24
+            new_fps   = round(1 / elapsed_s)
             new_infer = round(elapsed_ms, 2)
 
-            # Tulis nilai baru secara thread-safe
             with self._lock:
                 self._conf  = new_conf
                 self._fps   = new_fps
                 self._infer = new_infer
 
-            annotated = results[0].plot()
-            out = cv2.cvtColor(annotated, cv2.COLOR_RGB2BGR)
+            annotated = results[0].plot()              # ← output RGB
+            out = cv2.cvtColor(annotated, cv2.COLOR_RGB2BGR)  # ← balik ke BGR untuk WebRTC
         else:
-            out = img
+            out = img_bgr
 
         return av.VideoFrame.from_ndarray(out, format="bgr24")
-
-# ============================================================
 
 # STUN server agar bisa diakses dari luar jaringan lokal
 RTC_CONFIG = RTCConfiguration({
