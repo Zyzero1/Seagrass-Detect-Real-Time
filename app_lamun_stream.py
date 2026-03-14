@@ -32,6 +32,23 @@ st.markdown(f"""
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;900&family=Inter:wght@300;400;500&display=swap');
 
     header {{visibility: hidden;}}
+
+    /* ← TAMBAH DI SINI */
+    div[data-testid="stElementContainer"]:has(iframe[title="streamlit_autorefresh.st_autorefresh"]) {{
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }}
+    iframe[height="0"] {{
+        display: none !important;
+    }}
+    div:has(> iframe[height="0"]) {{
+        height: 0 !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }}
     .main, div.block-container, .stApp {{
         background-color: #0a1628 !important;
         padding-top: 0px !important;
@@ -52,6 +69,78 @@ st.markdown(f"""
         background: linear-gradient(90deg,#06b6d4,#3b82f6,#06b6d4);
         background-size: 200% 100%; animation: shimmer 3s linear infinite;
     }}
+
+    /* Hilangkan jarak atas dan bawah container webrtc */
+    div[data-testid="stVerticalBlock"] > div:has(> div.stWebRtcStreamer) {{
+        padding: 0 !important;
+        margin: 0 !important;
+    }}
+
+    .stWebRtcStreamer {{
+        padding: 0 !important;
+        margin: 0 !important;
+    }}
+
+    .stWebRtcStreamer > div {{
+        padding: 0 !important;
+        margin: 0 !important;
+    }}
+
+    /* Paksa video mengisi penuh tanpa jarak */
+    .stWebRtcStreamer video {{
+        width: 100% !important;
+        border-radius: 20px !important;
+        background: #0a1628 !important;
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }}
+
+    /* WEBRTC — sembunyikan tombol START/STOP bawaan, styling video */
+    .stWebRtcStreamer div[class*="style__mediaPlayer"] {{
+        border-radius: 20px !important;
+        overflow: hidden !important;
+        border: 1.5px solid rgba(6,182,212,0.2) !important;
+    }}
+    .stWebRtcStreamer video {{
+        width: 100% !important;
+        border-radius: 20px !important;
+        background: #0a1628 !important;
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }}
+
+    .stWebRtcStreamer {{
+        padding: 0 !important;
+        margin: 0 !important;
+    }}
+    .stWebRtcStreamer > div {{
+        padding: 0 !important;
+        margin: 0 !important;
+        line-height: 0 !important;
+    }}
+
+    /* Hilangkan jarak dari iframe st_autorefresh */
+    div[data-testid="stElementContainer"]:has(iframe[title="streamlit_autorefresh.st_autorefresh"]) {{
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }}
+
+    /* Hilangkan jarak dari semua iframe height=0 */
+    iframe[height="0"] {{
+        display: none !important;
+    }}
+
+    div:has(> iframe[height="0"]) {{
+        height: 0 !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }}
+    
     @keyframes shimmer {{ 0%{{background-position:-200% 0}} 100%{{background-position:200% 0}} }}
     .nav-badge {{
         background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.4);
@@ -435,12 +524,13 @@ RTC_CONFIG = RTCConfiguration({
 ctx = None
 col_cam, col_stat = st.columns([1.8, 1])
 
-if is_running:
-    ctx = webrtc_streamer(
-        key="seagrass-radar",
-        video_processor_factory=YOLOProcessor,
-        rtc_configuration=RTC_CONFIG,
-            media_stream_constraints={
+with col_cam:
+    if is_running:
+        ctx = webrtc_streamer(
+            key="seagrass-radar",
+            video_processor_factory=YOLOProcessor,
+            rtc_configuration=RTC_CONFIG,
+            media_stream_constraints={        
                 "video": {
                     "width":  {"ideal": 1280},
                     "height": {"ideal": 720},
@@ -450,11 +540,7 @@ if is_running:
             },
             async_processing=True,
         )
-
-col_cam, col_stat = st.columns([1.8, 1])
-
-with col_cam:
-    if not is_running:        
+    else:
         st.markdown("""
             <div class="cam-placeholder">
                 <div class="cam-radar-ring"></div>
